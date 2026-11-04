@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stonewake CI runs</title>
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --text: #1b1f24; --muted: #5b6470; --line: #dde1e6; --link: #0b5cd5;
+          --good: #12733a; --good-bg: #e2f4e8; --bad: #b42318; --bad-bg: #fde7e5; --wait: #8a5a00; --wait-bg: #fdf1d8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1216; --card: #171b21; --text: #e6e9ed; --muted: #9aa3ad; --line: #2a3038; --link: #6ea8ff;
+            --good: #6fd394; --good-bg: #133222; --bad: #ff8a80; --bad-bg: #3a1714; --wait: #f0c065; --wait-bg: #3a2c0c; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  p { margin: 4px 0; color: var(--muted); }
+  a { color: var(--link); }
+  code { font: 13px ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  .verdict { margin: 20px 0; padding: 14px 18px; border-radius: 10px; font-weight: 600; font-size: 17px; }
+  .verdict.good, .pill.good { color: var(--good); background: var(--good-bg); }
+  .verdict.bad, .pill.bad { color: var(--bad); background: var(--bad-bg); }
+  .verdict.wait, .pill.wait { color: var(--wait); background: var(--wait-bg); }
+  span.bad { color: var(--bad); font-weight: 600; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; }
+  th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  tr.extra td { color: var(--muted); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; padding: 1px 10px; border-radius: 99px; font-size: 13px; font-weight: 600; }
+  ul { color: var(--muted); padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Stonewake: CI runs</h1>
+  <p>Workflow <code>Playwright Tests</code>, branch <code>master</code>, commit <a href="https://github.com/alessiospb/stonewake-final-repo/commit/3131450348be7eeeb8d2e525583f88ec650c0dda"><code>3131450</code></a></p>
+  <div class="verdict good">5 of 5 runs green, first attempt, --retries=0</div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Run</th><th>Trigger</th><th>Attempt</th><th>Tests start (UTC)</th><th>End</th>
+        <th>Result</th><th class="num">Passed</th><th class="num">Failed</th><th class="num">Flaky</th><th class="num">Skipped</th>
+        <th class="num">Test time</th><th>Report</th>
+      </tr></thead>
+      <tbody>
+      <tr class="">
+        <td>1</td>
+        <td><a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41880929553">41880929553</a></td>
+        <td>push</td>
+        <td>1</td>
+        <td>2026-11-04 17:50:21</td>
+        <td>17:54:10</td>
+        <td><span class="pill good">success</span></td>
+        <td class="num">80</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">1.8 m</td>
+        <td><a href="runs/41880929553/index.html">Open</a></td>
+      </tr>
+      <tr class="">
+        <td>2</td>
+        <td><a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41881594540">41881594540</a></td>
+        <td>workflow_dispatch</td>
+        <td>1</td>
+        <td>2026-11-04 17:54:22</td>
+        <td>17:56:14</td>
+        <td><span class="pill good">success</span></td>
+        <td class="num">80</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">1.5 m</td>
+        <td><a href="runs/41881594540/index.html">Open</a></td>
+      </tr>
+      <tr class="">
+        <td>3</td>
+        <td><a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41881951911">41881951911</a></td>
+        <td>workflow_dispatch</td>
+        <td>1</td>
+        <td>2026-11-04 17:56:28</td>
+        <td>17:58:59</td>
+        <td><span class="pill good">success</span></td>
+        <td class="num">80</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">1.7 m</td>
+        <td><a href="runs/41881951911/index.html">Open</a></td>
+      </tr>
+      <tr class="">
+        <td>4</td>
+        <td><a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41882442057">41882442057</a></td>
+        <td>workflow_dispatch</td>
+        <td>1</td>
+        <td>2026-11-04 17:59:16</td>
+        <td>18:01:30</td>
+        <td><span class="pill good">success</span></td>
+        <td class="num">80</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">1.7 m</td>
+        <td><a href="runs/41882442057/index.html">Open</a></td>
+      </tr>
+      <tr class="">
+        <td>5</td>
+        <td><a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41882997402">41882997402</a></td>
+        <td>workflow_dispatch</td>
+        <td>1</td>
+        <td>2026-11-04 18:02:16</td>
+        <td>18:04:06</td>
+        <td><span class="pill good">success</span></td>
+        <td class="num">80</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">1.4 m</td>
+        <td><a href="runs/41882997402/index.html">Open</a></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>All runs of this commit on <code>master</code> (push and manual dispatch), oldest first. The series is the first 5; later runs are listed in grey.</li>
+    <li>Result is the <code>test</code> job. Counts come from the Playwright summary in that job's log; the step is <code>npx playwright test --retries=0</code>.</li>
+    <li>A re-run (attempt &gt; 1) or a run that overlaps the previous one breaks the series. A new commit starts a new series on this page.</li>
+    <li>Latest report: <a href="runs/41882997402/index.html">run 41882997402</a>. Each report is the run's own <code>playwright-report</code> artifact (kept 14 days).</li>
+  </ul>
+  <p>Page built 2026-11-04 18:04:23 UTC by run <a href="https://github.com/alessiospb/stonewake-final-repo/actions/runs/41882997402">41882997402</a>.</p>
+</main>
+</body>
+</html>
