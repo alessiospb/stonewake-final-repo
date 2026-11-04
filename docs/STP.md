@@ -74,7 +74,7 @@ The audit (`AUDIT.md`) recorded 10 passed and 10 failed of 20 tests. Four risks 
 - **Confirmed product defects** go to SpiraTest with steps, expected and actual results, and evidence. Local records are in `docs/defects.md`.
 - **Skips.** Per the organizers' clarification, a test failing because of a confirmed product defect may be `skipped`. It needs the real SpiraTest reference and a clear reason, and the test and assertion stay unchanged. Without an ID the case is tracked as pending, and no ID is invented.
 - **Never** skip for flaky automation, uncertain causes, convenience or CI cosmetics. Never weaken assertions, delete failing tests, swallow errors or use `continue-on-error`.
-- **Current deviation:** two tests are skipped with the ID still pending, by the participant's decision (`docs/competition-changes.md`). The IDs must be added before the five-run series.
+- **Current state:** two tests are skipped, with SpiraTest incidents 84 and 88 (`docs/defects.md`).
 - Final reporting lists every skipped test with its defect reference.
 
 ## 8. Entry, exit and stability criteria

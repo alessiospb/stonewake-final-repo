@@ -23,7 +23,7 @@ async function callTool(request: APIRequestContext, name: string, args: object) 
 
 test.describe('MCP without a key', () => {
   // Skipped for documentation defect D-02 (docs/defects.md). The assertions stay unchanged.
-  test.skip('lists the 38 read-only tools', { annotation: { type: 'defect', description: 'D-02, SpiraTest ID pending' } }, async ({ request }) => {
+  test.skip('lists the 38 read-only tools', { annotation: { type: 'defect', description: 'D-02, SpiraTest incident 88: https://itac.spiraservice.net/30/Incident/88.aspx' } }, async ({ request }) => {
     const body = await (await rpc(request, 'tools/list')).json();
     const names = body.result.tools.map((tool: { name: string }) => tool.name);
     expect(names).toHaveLength(38);
