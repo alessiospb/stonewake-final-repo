@@ -147,3 +147,81 @@ test('ui 10 portfolio', async ({ page, app }) => {
   await page.waitForURL(/\/entities\/n\d+/);
   await expect(app.heading).toHaveText(name);
 });
+
+test('ui 12 deal book next page', async ({ page, app }) => {
+  await expect(app.heading).toHaveText('Deal Book');
+  const firstDeal = page.locator("main a[href^='/deals/']").first();
+  const href = await firstDeal.getAttribute('href');
+  await page.getByRole('button', { name: 'Next' }).click();
+  await expect(firstDeal).not.toHaveAttribute('href', href ?? '');
+  await expect(page.getByRole('button', { name: 'Previous' })).toBeEnabled();
+});
+
+test('ui 13 empty search disables export and can be cleared', async ({ page, app }) => {
+  const search = page.getByRole('textbox', { name: 'Search deals' });
+  await expect(app.heading).toHaveText('Deal Book');
+  await search.fill('zzzzqqxx');
+  await expect(page.getByText('No matching deals')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Export' })).toBeDisabled();
+  await page.getByRole('button', { name: /Clear the search/i }).click();
+  await expect(search).toHaveValue('');
+  await expect(page.locator("main a[href^='/deals/']").first()).toBeVisible();
+});
+
+test('ui 14 institutions search and country filter', async ({ page, app }) => {
+  const search = page.locator('input[placeholder="Search institutions…"]');
+  await page.goto('/entities');
+  await expect(app.heading).toHaveText('Institutions');
+  await search.fill('zzzzqqxx');
+  await expect(page.getByText('No matching institutions')).toBeVisible();
+  await search.fill('');
+  await page.locator('select[aria-label="Country"]').selectOption({ label: 'Japan' });
+  await expect(page.getByRole('main')).toContainText('JBIC');
+});
+
+// Only the form is exercised: a started screening leaves a record that cannot be removed.
+test('ui 15 new screening form needs its fields and can be cancelled', async ({ page, app }) => {
+  await page.goto('/screenings');
+  await expect(app.heading).toHaveText('Screenings');
+  await page.getByRole('button', { name: 'New screening' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('button', { name: 'Start screening' })).toBeDisabled();
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).toBeHidden();
+});
+
+// Nothing is saved: an invalid draft cannot be previewed or activated.
+test('ui 16 scoring refuses a weight out of range', async ({ page, app }) => {
+  await page.goto('/scoring');
+  await expect(app.heading).toHaveText('Scoring');
+  await page.getByLabel('Freshness').fill('-1');
+  await expect(page.getByRole('button', { name: 'Preview effect' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'Save and activate' })).toBeDisabled();
+});
+
+test('ui 17 network search opens a company', async ({ page, app }) => {
+  await page.goto('/network');
+  await expect(app.heading).toHaveText('Network');
+  await page.getByRole('main').getByRole('textbox').first().fill('Siemens');
+  const viewNetwork = page.getByRole('link', { name: 'View network' }).or(page.getByRole('button', { name: 'View network' })).first();
+  await viewNetwork.click();
+  await expect(page.getByRole('main')).toContainText('Siemens');
+});
+
+test('ui 18 deal report downloads as a PDF', async ({ page, app }) => {
+  await expect(app.heading).toHaveText('Deal Book');
+  await page.locator("main a[href^='/deals/']").first().click();
+  await page.waitForURL('**/deals/*');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download report' }).click();
+  expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
+});
+
+test('ui 19 monitoring offers research and sentiment', async ({ page, app }) => {
+  await page.goto('/monitoring');
+  await expect(app.heading).toHaveText('Monitoring');
+  await expect(page.getByRole('button', { name: 'Monitor a name' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Research' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Sentiment' }).click();
+  await expect(page.getByRole('tab', { name: 'Sentiment' })).toHaveAttribute('aria-selected', 'true');
+});

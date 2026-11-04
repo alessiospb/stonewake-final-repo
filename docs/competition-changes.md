@@ -14,6 +14,7 @@ Finding IDs come from `AUDIT.md`. No secrets or test data are recorded here.
 | C-08 (F14) | CI | Runs could cancel each other | `cancel-in-progress: true` | `playwright.yml` | Set to `false`, added `--retries=0` | Static |
 | C-11 | Coverage | No API contract or MCP checks | Gaps in `AUDIT.md` section D | `tests/api-contract.spec.ts`, `tests/api-mcp.spec.ts` | 54 new tests: paging, validation, read-only routes, credentials, rate limit headers, deals, countries, nodes, hostile search input, MCP refusals, MCP vs API | Local run: passed, except the D-02 skip |
 | C-12 (F14) | Reporting | No public report | Report kept as an artifact only | `playwright.yml`, `scripts/build-pages-site.mjs` | Pages index of all runs of a commit, each with its report; docs-only pushes start no run | Pending CI |
+| C-13 | Coverage | Deal Book paging and export, Screenings, Scoring, Network, Monitoring had thin UI coverage | Gaps in `AUDIT.md` section D | `tests/ui.spec.ts` | `ui 12`-`ui 19`, none of which saves anything in the workspace | Local run: passed |
 | C-10 | Environment | `ui 6` failed on `EDD Dossiers` under the team's account | Modules are set per team; the participant confirmed that team `itac-6` does not hold this module | `tests/ui.spec.ts` | Link removed from `ui 6`; new `ui 11` asserts it is not offered and `/dossiers` does not open the section | `ui 6` passed; `ui 11` failed, see D-01 |
 | C-09 (F13, F16) | Tooling | `console.log` of identity data; no type check | Missing TypeScript setup | `tests/api.spec.ts`, `tsconfig.json`, `package.json` | Log removed; TypeScript, `strict`, `typecheck` script added | `tsc --noEmit` passed |
 
@@ -38,5 +39,5 @@ The participant chose to skip these before the SpiraTest IDs exist. Both keep th
 
 - Exposed credentials stay in git history and in the `baseline` branch until the organizers rotate them.
 - Suspected application defects: D-01 and D-02 in `docs/defects.md`. Also D-02. Both tests are skipped, see above.
-- Verification: the participant's local run on 2026-11-04 gave 72 passed, 2 skipped, 0 failed, zero retries, 54 s, 74 tests. The AI does not sign in to the live product, so it ran only the tests that need no login.
+- Verification: the participant's local run on 2026-11-04 gave 80 passed, 2 skipped, 0 failed, zero retries, 1.5 min, 82 tests. CI run 41877141332 on the earlier 74-test commit: 72 passed, 2 skipped, 51.8 s. The AI does not sign in to the live product, so it ran only the tests that need no login.
 - The API key expires on 2026-11-13.
