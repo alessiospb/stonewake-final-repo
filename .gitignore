@@ -1,7 +1,13 @@
-# Playwright
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+# Dependencies
+node_modules/
 
 # Secrets
+.env
 .playwright-mcp/
+/playwright/.auth/
+
+# Playwright output
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

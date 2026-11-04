@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-var EMAIL = 'akomanov88@gmail.com';
-var PASS = 'cMV5GbHdJTgWfgab2sri';
+var EMAIL = process.env.STONEWAKE_EMAIL ?? '';
+var PASS = process.env.STONEWAKE_PASSWORD ?? '';
 
 test('ui 1 login ok', async ({ page }) => {
   await page.goto('https://app.stonewake.ai/');

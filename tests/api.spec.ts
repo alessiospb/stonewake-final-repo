@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-var KEY = 'swk_live_QRReoWVfrAKc91ipjs8WYqNpiCo9HzEWhYxKu5H8';
+var KEY = process.env.STONEWAKE_API_KEY ?? '';
 
 test('api 1 health', async ({ request }) => {
   var r = await request.get('https://api.stonewake.ai/v1/health');
