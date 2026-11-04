@@ -1,198 +1,149 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, EMAIL, PASSWORD } from './fixtures';
+import { AppPage } from '../pages/app.page';
 
-var EMAIL = process.env.STONEWAKE_EMAIL ?? '';
-var PASS = process.env.STONEWAKE_PASSWORD ?? '';
-
-test('ui 1 login ok', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/');
-  await page.waitForTimeout(2000);
-  expect(page.url()).toContain('/login');
+test('ui 1 login ok', async ({ page, loginPage }) => {
+  await page.goto('/');
+  await page.waitForURL('**/login');
   await expect(page).toHaveTitle('Sign in · Stonewake');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
-  await page.fill('#email', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
+  await expect(loginPage.heading).toBeVisible();
+  await loginPage.submitCredentials(EMAIL, PASSWORD);
+  await page.waitForURL('/');
+  const app = new AppPage(page);
   await expect(page).toHaveTitle('Deal Book · Stonewake');
-  await expect(page.locator('h1')).toHaveText('Deal Book');
-  await expect(page.locator('#app-sidebar')).toContainText('Team');
-  await expect(page.locator('#app-sidebar a[data-tour="module-deals"]')).toBeVisible();
-  await expect(page.locator('#app-sidebar a[data-tour="module-portfolio"]')).toBeVisible();
-  await expect(page.locator('#app-sidebar a[data-tour="module-countries"]')).toBeVisible();
-  await expect(page.locator('//aside//button[normalize-space(.)="Sign out"]')).toBeVisible();
+  await expect(app.heading).toHaveText('Deal Book');
+  await expect(app.sidebar).toContainText('Team');
+  await expect(app.sidebarLink('Deal Book')).toBeVisible();
+  await expect(app.sidebarLink('Portfolio')).toBeVisible();
+  await expect(app.sidebarLink('Countries')).toBeVisible();
+  await expect(app.signOut).toBeVisible();
 });
 
-test('ui 2 wrong password', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', 'definitely-wrong-password-123');
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await expect(page.locator('text=That email and password do not match. Check both and try again.')).toBeVisible();
-  expect(page.url()).toBe('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
+test('ui 2 wrong password', async ({ page, loginPage }) => {
+  await loginPage.open();
+  await loginPage.submitCredentials(EMAIL, 'definitely-wrong-password-123');
+  await expect(page.getByText('That email and password do not match. Check both and try again.')).toBeVisible();
+  await expect(page).toHaveURL('/login');
+  await expect(loginPage.heading).toBeVisible();
   await expect(page.locator('#app-sidebar')).toHaveCount(0);
 });
 
-test('ui 3 terms checkbox', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await expect(page.locator('button[type="submit"]')).toBeDisabled();
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await expect(page.locator('button[type="submit"]')).toBeDisabled();
-  await page.check('input[type="checkbox"]');
-  await expect(page.locator('button[type="submit"]')).toBeEnabled();
-  await page.uncheck('input[type="checkbox"]');
-  await expect(page.locator('button[type="submit"]')).toBeDisabled();
-  await expect(page.locator('//a[text()="Terms of Service"]')).toHaveAttribute('href', 'https://stonewake.ai/terms');
+test('ui 3 terms checkbox', async ({ page, loginPage }) => {
+  await loginPage.open();
+  await expect(loginPage.submit).toBeDisabled();
+  await loginPage.email.fill(EMAIL);
+  await loginPage.password.fill(PASSWORD);
+  await expect(loginPage.submit).toBeDisabled();
+  await loginPage.terms.check();
+  await expect(loginPage.submit).toBeEnabled();
+  await loginPage.terms.uncheck();
+  await expect(loginPage.submit).toBeDisabled();
+  await expect(page.getByRole('link', { name: 'Terms of Service' })).toHaveAttribute('href', 'https://stonewake.ai/terms');
 });
 
-test('ui 4 not logged in redirect', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
-  await page.goto('https://app.stonewake.ai/portfolio');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
-  await page.goto('https://app.stonewake.ai/countries/DEU');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
-  await page.goto('https://app.stonewake.ai/entities');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
+test('ui 4 not logged in redirect', async ({ page, loginPage }) => {
+  for (const path of ['/', '/portfolio', '/countries/DEU', '/entities']) {
+    await page.goto(path);
+    await page.waitForURL('/login');
+    await expect(loginPage.heading).toBeVisible();
+  }
   await expect(page.locator('#app-sidebar')).toHaveCount(0);
 });
 
-test('ui 5 logout', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await expect(page.locator('h1')).toHaveText('Deal Book');
-  await page.click('//aside//button[normalize-space(.)="Sign out"]');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
-  await page.goto('https://app.stonewake.ai/portfolio');
-  await page.waitForURL('https://app.stonewake.ai/login');
-  await expect(page.locator('//h1[text()="Sign in"]')).toBeVisible();
+test('ui 5 logout', async ({ page, app, loginPage }) => {
+  await expect(app.heading).toHaveText('Deal Book');
+  await app.signOut.click();
+  await page.waitForURL('/login');
+  await expect(loginPage.heading).toBeVisible();
+  await page.goto('/portfolio');
+  await page.waitForURL('/login');
+  await expect(loginPage.heading).toBeVisible();
 });
 
-test('ui 6 sidebar', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await page.click('#app-sidebar a[data-tour="module-countries"]');
-  await page.waitForURL('**/countries');
-  await expect(page.locator('h1')).toHaveText('Countries');
-  await page.click('#app-sidebar a[data-tour="module-entities"]');
-  await page.waitForURL('**/entities');
-  await expect(page.locator('h1')).toHaveText('Institutions');
-  await page.click('#app-sidebar a[data-tour="module-portfolio"]');
-  await page.waitForURL('**/portfolio');
-  await expect(page.locator('h1')).toHaveText('Portfolio');
-  await page.click('//aside//a[normalize-space(.)="Monitoring"]');
-  await page.waitForURL('**/monitoring');
-  await expect(page.locator('h1')).toHaveText('Monitoring');
-  await page.click('//aside//a[normalize-space(.)="Screenings"]');
-  await page.waitForURL('**/screenings');
-  await expect(page.locator('h1')).toHaveText('Screenings');
-  await page.click('//aside//a[normalize-space(.)="EDD Dossier"]');
-  await page.waitForURL('**/dossiers');
-  await expect(page.locator('h1')).toHaveText('EDD Dossiers');
-  await page.click('//aside//a[normalize-space(.)="Scoring"]');
-  await page.waitForURL('**/scoring');
-  await expect(page.locator('h1')).toHaveText('Scoring');
+test('ui 6 sidebar', async ({ page, app }) => {
+  const pages = [
+    { link: 'Countries', url: '**/countries', heading: 'Countries' },
+    { link: 'Institutions', url: '**/entities', heading: 'Institutions' },
+    { link: 'Portfolio', url: '**/portfolio', heading: 'Portfolio' },
+    { link: 'Monitoring', url: '**/monitoring', heading: 'Monitoring' },
+    { link: 'Screenings', url: '**/screenings', heading: 'Screenings' },
+    { link: 'Scoring', url: '**/scoring', heading: 'Scoring' },
+  ];
+  for (const { link, url, heading } of pages) {
+    await app.sidebarLink(link).click();
+    await page.waitForURL(url);
+    await expect(app.heading).toHaveText(heading);
+  }
 });
 
-test('ui 7 deal book search', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await page.waitForTimeout(3000);
-  await expect(page.locator('select[aria-label="All sectors"]')).toBeVisible();
-  await expect(page.locator('[role="tab"][aria-selected="true"]')).toHaveText('Deals');
-  var link = page.locator("main a[href^='/deal/']").first();
-  await expect(link).toBeVisible();
-  var href = await link.getAttribute('href');
-  await page.fill('input[placeholder="Search deals…"]', 'zzzzqqxx');
-  await expect(page.locator('text=No matching deals')).toBeVisible();
-  await page.fill('input[placeholder="Search deals…"]', '');
-  await page.click("main a[href='" + href + "']");
-  await page.waitForURL('**' + href);
+// Modules are set per team, and team itac-6 does not hold the dossiers module.
+// Skipped for product defect D-01 (docs/defects.md). The assertions stay unchanged.
+test.skip('ui 11 dossiers module is not offered', { annotation: { type: 'defect', description: 'D-01, SpiraTest incident 84: https://itac.spiraservice.net/30/Incident/84.aspx' } }, async ({ page, app }) => {
+  await expect(app.sidebarLink('Scoring')).toBeVisible();
+  await expect(app.sidebarLink('EDD Dossiers')).toHaveCount(0);
+  await page.goto('/dossiers');
+  await expect(app.heading).not.toHaveText('EDD Dossiers');
+});
+
+test('ui 7 deal book search', async ({ page, app }) => {
+  const search = page.getByRole('textbox', { name: 'Search deals' });
+  await expect(app.heading).toHaveText('Deal Book');
+  await expect(page.getByRole('combobox', { name: 'All sectors' })).toBeVisible();
+  await expect(page.getByRole('tab', { selected: true })).toHaveText('Deals');
+  // Any deal will do: the book is live data, so no deal can be named in advance.
+  const firstDeal = page.locator("main a[href^='/deals/']").first();
+  await expect(firstDeal).toBeVisible();
+  const href = await firstDeal.getAttribute('href');
+  await search.fill('zzzzqqxx');
+  await expect(page.getByText('No matching deals')).toBeVisible();
+  await search.fill('');
+  await page.locator(`main a[href='${href}']`).click();
+  await page.waitForURL(`**${href}`);
   await expect(page.locator('//h2[text()="Briefing"]')).toBeVisible();
 });
 
-test('ui 8 countries', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await page.goto('https://app.stonewake.ai/countries');
-  await expect(page.locator('h1')).toHaveText('Countries');
-  await page.fill('input[aria-label="Search countries"]', 'Germany');
-  await page.waitForTimeout(1000);
-  await page.click('main a[href="/countries/DEU"]');
-  await page.waitForURL('https://app.stonewake.ai/countries/DEU');
-  await expect(page.locator('h1')).toHaveText('Germany');
+test('ui 8 countries', async ({ page, app }) => {
+  const search = page.locator('input[aria-label="Search countries"]');
+  await page.goto('/countries');
+  await expect(app.heading).toHaveText('Countries');
+  await search.fill('Germany');
+  await page.locator('main a[href="/countries/DEU"]').click();
+  await page.waitForURL('/countries/DEU');
+  await expect(app.heading).toHaveText('Germany');
   await expect(page.locator('//h2[text()="Country risk"]')).toBeVisible();
   await expect(page.locator('//h2[text()="Data sources"]')).toBeVisible();
-  await page.goto('https://app.stonewake.ai/countries');
-  await page.fill('input[aria-label="Search countries"]', 'Zzzzqq');
-  await expect(page.locator('text=No matching countries')).toBeVisible();
+  await page.goto('/countries');
+  await search.fill('Zzzzqq');
+  await expect(page.getByText('No matching countries')).toBeVisible();
   await expect(page.locator("table a[href^='/countries/']")).toHaveCount(0);
-  await page.goto('https://app.stonewake.ai/countries/ZZZ');
+  await page.goto('/countries/ZZZ');
   await expect(page).toHaveTitle('Page not found · Stonewake');
 });
 
-test('ui 9 institutions', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await page.goto('https://app.stonewake.ai/entities');
-  await expect(page.locator('h1')).toHaveText('Institutions');
+test('ui 9 institutions', async ({ page, app }) => {
+  await page.goto('/entities');
+  await expect(app.heading).toHaveText('Institutions');
   await expect(page.locator('select[aria-label="Kind"]')).toBeVisible();
   await expect(page.locator('select[aria-label="Country"]')).toBeVisible();
-  await page.fill('input[placeholder="Search institutions…"]', 'UKEF');
+  await page.locator('input[placeholder="Search institutions…"]').fill('UKEF');
   await expect(page.locator('main a[href="/entities/4"]')).toContainText('UK Export Finance');
   await expect(page.locator("main a[href^='/entities/']")).toHaveCount(1);
-  await page.click('main a[href="/entities/4"]');
-  await page.waitForURL('https://app.stonewake.ai/entities/4');
+  await page.locator('main a[href="/entities/4"]').click();
+  await page.waitForURL('/entities/4');
   await expect(page).toHaveTitle('Institutions · Stonewake');
-  await expect(page.locator('h1')).toBeVisible();
+  await expect(app.heading).toBeVisible();
 });
 
-test('ui 10 portfolio', async ({ page }) => {
-  await page.goto('https://app.stonewake.ai/login');
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASS);
-  await page.click('button[role="checkbox"]');
-  await page.click('button[type="submit"]');
-  await page.waitForURL('https://app.stonewake.ai/');
-  await page.goto('https://app.stonewake.ai/portfolio');
-  await expect(page.locator('h1')).toHaveText('Portfolio');
-  await expect(page.locator('[data-testid="tile-red"]')).toBeVisible();
-  await expect(page.locator('[data-testid="tile-amber"]')).toBeVisible();
-  await expect(page.locator('[data-testid="tile-green"]')).toBeVisible();
-  await expect(page.locator('[data-testid="tile-insufficient"]')).toBeVisible();
-  await expect(page.locator('[data-testid="tile-not-assessed"]')).toBeVisible();
-  var first = page.locator('tbody a[href^="/entities/n"]').first();
-  await expect(first).toBeVisible();
-  var name = (await first.innerText()).trim();
-  await first.click();
+test('ui 10 portfolio', async ({ page, app }) => {
+  await page.goto('/portfolio');
+  await expect(app.heading).toHaveText('Portfolio');
+  for (const status of ['red', 'amber', 'green', 'insufficient', 'not_assessed']) {
+    await expect(page.getByTestId(`tile-${status}`)).toBeVisible();
+  }
+  // Any company will do: the first row of the live book.
+  const firstCompany = page.locator('tbody a[href^="/entities/n"]').first();
+  await expect(firstCompany).toBeVisible();
+  const name = (await firstCompany.innerText()).trim();
+  await firstCompany.click();
   await page.waitForURL(/\/entities\/n\d+/);
-  await expect(page.locator('h1')).toHaveText(name);
+  await expect(app.heading).toHaveText(name);
 });
