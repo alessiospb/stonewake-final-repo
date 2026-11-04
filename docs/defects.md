@@ -65,3 +65,12 @@ PS> $names.Count
 **Priority:** Low
 
 **Severity:** Low. Documentation only: the tools themselves were not seen to misbehave.
+
+## Found by manual exploration
+
+Found by Codex in the manual runs and confirmed by the participant by hand. No automated test covers them yet. Full reports: [ai/results/codex-bug-reports.md](../ai/results/codex-bug-reports.md).
+
+| ID | SpiraTest ID | Name of incident | Priority | Severity |
+|---|---|---|---|---|
+| SW-01 | [85](https://itac.spiraservice.net/30/Incident/85.aspx) | "1 source" expands the update history instead of opening the source | P2, Medium | Minor |
+| SW-02 | [87](https://itac.spiraservice.net/30/Incident/87.aspx) | Expanded Updates section displays two identical update blocks | P2, Medium | Minor |

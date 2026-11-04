@@ -1,6 +1,6 @@
 # STP: Stonewake test automation
 
-**Status: Initial / To be updated before submission**
+**Status: Updated before submission.** Sections 2-9 keep the initial plan; section 10 records what changed.
 - **Date:** 2026-11-04, during the ITAC 2026 final.
 - **Scope:** the live Stonewake product (dashboard, API, MCP server) in the team workspace `itac-6`, and this Playwright suite with its CI.
 - **Baseline:** `AUDIT.md` (commit `b4f92c9`, branch `baseline`).
@@ -114,8 +114,15 @@ P0 and P1 work comes first. Docker, visual testing, integrations, self-healing a
 - What load is allowed for performance testing? Assumed: within normal limits.
 - Do team members share the workspace, and is data reset? Assumed: shared, not reset.
 
-## 10. Planned final updates
+## 10. Final updates
 
-Before submission, update: actual scope and coverage, changes made, defects and SpiraTest references, skipped tests, verification evidence, residual risks, and deviations from this plan.
+Actual results are in the separate STR, [STR.md](STR.md). Compared with this plan:
 
-The STR is the separate record of the actual execution results.
+- **Scope and coverage:** 82 tests. Screenings and Monitoring are covered up to the form and page level, and nothing that leaves a permanent record was automated.
+- **Changes:** [competition-changes.md](competition-changes.md).
+- **Defects:** four in SpiraTest, incidents 84, 85, 87 and 88, in [defects.md](defects.md).
+- **Skipped tests:** two, for incidents 84 and 88, with their assertions unchanged.
+- **Verification:** five consecutive green CI runs on `3131450`, listed in the STR.
+- **Residual risks:** listed in the STR. Performance was not tested, and security testing stayed read-only.
+- **Deviations:** code freeze at about 1:45; the report is published through the `gh-pages` branch.
+- **Open questions:** the dossiers module and the limits of a public report stayed unanswered, and the assumptions in section 9 were used.
