@@ -64,15 +64,13 @@ jobs:
 
       - name: Claude diagnoses and proposes minimal fixes
         if: steps.baseline.outputs.exit_code != '0'
-        uses: anthropics/claude-code-action@v1
+        # The CLI, not claude-code-action: the action refuses the push event, and workflow_dispatch
+        # would need this file on master, which stays frozen with the five-run series.
         env:
           BASH_DEFAULT_TIMEOUT_MS: '1200000'
           BASH_MAX_TIMEOUT_MS: '1200000'
-        with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          # Off: logs of a public repository must not carry the agent's full output.
-          show_full_output: false
-          prompt: |
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          HEAL_PROMPT: |
             You are repairing Playwright TypeScript test automation on a manually selected branch.
             The initial Chromium test run failed; read /tmp/playwright-baseline.log and inspect the repository.
             Diagnose the actual cause before editing. Distinguish automation defects, product defects,
@@ -91,7 +89,7 @@ jobs:
             Do not commit, push, create branches, or open pull requests. A later workflow step
             handles PR creation only after independent verification. Summarize the diagnosis,
             exact files changed, and commands/results.
-          claude_args: '--allowedTools Bash,Read,Edit'
+        run: npx --yes @anthropic-ai/claude-code -p "$HEAL_PROMPT" --allowedTools Bash,Read,Edit
 
       - name: Verify changes independently
         if: steps.baseline.outputs.exit_code != '0'
