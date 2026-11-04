@@ -11,6 +11,8 @@
 2. **Secret removal.** Requested by the participant after the audit. Commit `9b5f2a2`.
 3. **Stabilization.** Prompt: `ai/prompt2-improve.md`. It asks for a short plan, then implementation; no deleted or skipped tests and no weakened assertions; no extra retries or timeouts; a change log and this file; no commits or pushes.
 
+4. **Self-healing demonstration.** Workflow based on the participant's `heal.yml`, on branch `demo/self-healing`. Claude Code ran in CI and repaired one selector. See `docs/STR.md`, section 6.
+
 ## Significant AI-assisted changes
 
 - Credentials moved to the environment; generated files untracked.

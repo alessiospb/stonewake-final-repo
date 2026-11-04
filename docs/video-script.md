@@ -1,7 +1,7 @@
 # ITAC 2026 — Jam.dev Screen Recording Script
 
 - Status: DRAFT — recording not yet completed
-- Target duration: ~2.5 minutes
+- Target duration: ~2.5-3 minutes
 - Recording method: Jam.dev screen capture + spoken Hebrew
 - Evidence reviewed: `README.md`, `AUDIT.md`, `docs/STP.md`, `docs/STR.md`, `docs/defects.md`, `docs/competition-changes.md`, `tests/fixtures.ts`, `tests/api-mcp.spec.ts`, the public report page, Actions run 41882997402
 
@@ -33,7 +33,8 @@ Open these tabs in this order, all on GitHub or the public page, not in the loca
 | 1:10–1:30 | Tab 4, `tests/api-mcp.spec.ts` | The test `portfolio matches the API` | הוספתי כיסוי. עכשיו יש שמונים ושתיים בדיקות: UI, API ושרת MCP. למשל, הבדיקה הזאת משווה את הנתונים מ-MCP לנתונים מה-API. | Я добавил покрытие. Теперь есть восемьдесят два теста: UI, API и сервер MCP. Например, этот тест сравнивает данные из MCP с данными из API. | `docs/STR.md`, sections 2, 3 |
 | 1:30–2:00 | Tab 5, the Actions run, then Tab 6, the public page | `80 passed`, `2 skipped` in the log; "5 of 5 runs green"; open one report | זו ריצה ב-GitHub Actions. עשיתי חמש ריצות רצופות על אותו commit, בלי retries. בכל ריצה שמונים עברו, אפס נכשלו, ושתיים דולגו. כאן הדוח הציבורי, ולכל ריצה יש דוח משלה. | Это запуск в GitHub Actions. Я сделал пять запусков подряд на одном коммите, без ретраев. В каждом восемьдесят прошло, ноль упало и два пропущено. Вот публичный отчёт, у каждого запуска свой отчёт. | `docs/STR.md`, section 1 |
 | 2:00–2:20 | Tab 7, `docs/STR.md`, section 4 | The defects table and the skipped tests | מצאנו ארבעה באגים במוצר, והם רשומים ב-SpiraTest. שתי הבדיקות שדולגו קשורות לשניים מהם, והבדיקות עצמן נשארו בקוד. המגבלות כתובות כאן בכנות. למשל, לא עשיתי בדיקות עומס. | Мы нашли четыре дефекта продукта, они заведены в SpiraTest. Два пропущенных теста связаны с двумя из них, сами проверки остались в коде. Ограничения честно описаны здесь. Например, нагрузочных тестов я не делал. | `docs/STR.md`, sections 4, 5 |
-| 2:20–2:35 | Tab 8, the repository README | The table of links and the AI section | ב-README יש קישורים לכל המסמכים: STP, STR, השינויים והשימוש ב-AI. תודה רבה. | В README есть ссылки на все документы: STP, STR, изменения и использование ИИ. Большое спасибо. | `README.md` |
+| 2:20–2:35 (optional) | https://github.com/alessiospb/stonewake-final-repo/pull/1 | The one-line change | בנוסף, הכנתי הדגמה של self-healing. בדיקה נכשלה, Claude תיקן סלקטור אחד ופתח Pull Request אחרי ריצה ירוקה. | Кроме того, я подготовил демонстрацию self-healing. Тест упал, Claude исправил один селектор и открыл Pull Request после зелёного прогона. | `docs/STR.md`, section 6 |
+| 2:35–2:50 | Tab 8, the repository README | The table of links and the AI section | ב-README יש קישורים לכל המסמכים: STP, STR, השינויים והשימוש ב-AI. תודה רבה. | В README есть ссылки на все документы: STP, STR, изменения и использование ИИ. Большое спасибо. | `README.md` |
 
 ## Recording checklist
 
@@ -49,5 +50,4 @@ Open these tabs in this order, all on GitHub or the public page, not in the loca
 
 - Stonewake has not confirmed D-01 and D-02, so the narration says the defects are registered, not that Stonewake accepted them.
 - SpiraTest links may need a login. The script does not open them.
-- The self-healing demo was not run, so it is left out of the narration.
 - The script omits "stable" and "no flakiness": five runs are evidence, not proof.

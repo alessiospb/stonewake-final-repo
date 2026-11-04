@@ -78,3 +78,30 @@ Both keep their original assertions. Stonewake has not yet confirmed D-01 or D-0
 - **Live data:** the suite ran on a changing product, and tests with fixed values (`ui 9`, `ui 7` Briefing) can fail if the data changes.
 - **Report retention:** run artifacts expire after 14 days. The public page keeps the copies it has published.
 - **API key** expires on 2026-11-13, so the API and MCP tests that use it will fail after that date.
+
+## 6. Self-healing demonstration
+
+A separate demonstration, not part of the tested code. It is on branch [`demo/self-healing`](https://github.com/alessiospb/stonewake-final-repo/tree/demo/self-healing), which is not merged into `master`.
+
+The original outdated selector `/deal/` was put back into `ui 7` on purpose. The workflow `.github/workflows/heal.yml` on that branch then ran the suite, let Claude Code diagnose the failure, verified the change independently and opened a pull request only after a green run.
+
+| Step | Result |
+|---|---|
+| Baseline run | 79 passed, 1 failed (`ui 7`), 2 skipped |
+| Repair | One line: `/deal/` to `/deals/` |
+| Independent verification | 80 passed, 2 skipped |
+| Pull request | [#1](https://github.com/alessiospb/stonewake-final-repo/pull/1), `ai/heal-41886280974` into `demo/self-healing`, left open |
+
+Run: [41886280974](https://github.com/alessiospb/stonewake-final-repo/actions/runs/41886280974).
+
+## 7. Other runs on the Actions page
+
+The series in section 1 is the evidence. The page also shows these runs, none of which counts towards it:
+
+| Run | Workflow, branch | Shown as | Why |
+|---|---|---|---|
+| [41885808200](https://github.com/alessiospb/stonewake-final-repo/actions/runs/41885808200) | Heal, `demo/self-healing` | Failure | First healing attempt. The test failed on purpose, then `claude-code-action` refused the `push` event. The next run used the CLI |
+| [41887790499](https://github.com/alessiospb/stonewake-final-repo/actions/runs/41887790499) | Playwright Tests, `ai/heal-41886280974` | Action required | The bot's pull request is waiting for approval to run. It was not approved; the change was verified in run 41886280974 |
+| [41877141332](https://github.com/alessiospb/stonewake-final-repo/actions/runs/41877141332) | Playwright Tests, `master`, `d048735` | Cancelled | Earlier commit with 74 tests: 72 passed, 2 skipped. Cancelled because its publish step stayed waiting |
+| [41865680927](https://github.com/alessiospb/stonewake-final-repo/actions/runs/41865680927) | Playwright Tests, `master`, `9b5f2a2` | Failure | The original tests with credentials moved out: 10 passed, 10 failed. The baseline before the fixes |
+

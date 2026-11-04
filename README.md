@@ -51,6 +51,10 @@ On CI the credentials come from the GitHub Secrets `STONEWAKE_EMAIL`, `STONEWAKE
 
 Tests that would leave permanent records in the shared workspace, such as starting a screening, are not automated. Two tests are skipped for product defects, with their SpiraTest incidents, see [docs/defects.md](docs/defects.md).
 
+## Self-healing demonstration
+
+Branch [`demo/self-healing`](https://github.com/alessiospb/stonewake-final-repo/tree/demo/self-healing) puts an original broken selector back on purpose. Its workflow runs the tests, lets Claude Code repair the failure, verifies the change and opens [pull request #1](https://github.com/alessiospb/stonewake-final-repo/pull/1). The branch is not merged, so the red run on it is expected. See [docs/STR.md](docs/STR.md), sections 6 and 7.
+
 ## AI usage
 
 **Tools**
