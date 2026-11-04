@@ -90,7 +90,7 @@ test('ui 7 deal book search', async ({ page, app }) => {
   await expect(page.getByRole('combobox', { name: 'All sectors' })).toBeVisible();
   await expect(page.getByRole('tab', { selected: true })).toHaveText('Deals');
   // Any deal will do: the book is live data, so no deal can be named in advance.
-  const firstDeal = page.locator("main a[href^='/deals/']").first();
+  const firstDeal = page.locator("main a[href^='/deal/']").first();
   await expect(firstDeal).toBeVisible();
   const href = await firstDeal.getAttribute('href');
   await search.fill('zzzzqqxx');

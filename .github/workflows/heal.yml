@@ -1,0 +1,160 @@
+name: Heal Playwright Tests (manual)
+
+on:
+  # The demo branch triggers it by push: workflow_dispatch needs the file on the default branch,
+  # and master stays frozen with the five-run series.
+  push:
+    branches: [demo/self-healing]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual healing (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-heal-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  heal:
+    # Only in this repository. It is a fork, so a check for fork == false would never run.
+    if: github.repository == 'alessiospb/stonewake-final-repo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      STONEWAKE_EMAIL: ${{ secrets.STONEWAKE_EMAIL }}
+      STONEWAKE_PASSWORD: ${{ secrets.STONEWAKE_PASSWORD }}
+      STONEWAKE_API_KEY: ${{ secrets.STONEWAKE_API_KEY }}
+
+    steps:
+      - name: Check out selected branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22' # Adjust to the repository's supported Node version.
+          cache: npm
+
+      - name: Install dependencies and Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run baseline tests (failure is evidence, not success)
+        id: baseline
+        shell: bash
+        run: |
+          set +e
+          npx playwright test --retries=0 --reporter=line 2>&1 | tee /tmp/playwright-baseline.log
+          result=${PIPESTATUS[0]}
+          echo "exit_code=$result" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Claude diagnoses and proposes minimal fixes
+        if: steps.baseline.outputs.exit_code != '0'
+        uses: anthropics/claude-code-action@v1
+        env:
+          BASH_DEFAULT_TIMEOUT_MS: '1200000'
+          BASH_MAX_TIMEOUT_MS: '1200000'
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Off: logs of a public repository must not carry the agent's full output.
+          show_full_output: false
+          prompt: |
+            You are repairing Playwright TypeScript test automation on a manually selected branch.
+            The initial Chromium test run failed; read /tmp/playwright-baseline.log and inspect the repository.
+            Diagnose the actual cause before editing. Distinguish automation defects, product defects,
+            and environment failures. Only fix confirmed automation defects with minimal changes.
+
+            Never delete/skip tests, weaken assertions, change expected product behavior, add retries,
+            introduce continue-on-error, or hide errors. Do not edit application/product code,
+            CI workflows, lockfiles, secrets, or configuration merely to obtain green results.
+            Do not assume any named test is intentionally failing; investigate evidence.
+
+            After a fix, run affected tests with --retries=0, then the full Chromium suite once.
+            Never print environment variables, credentials or tokens.
+            Stop after at most two repair iterations. If the failure is a product/environment issue,
+            or cannot be safely repaired, explain and leave it unresolved.
+
+            Do not commit, push, create branches, or open pull requests. A later workflow step
+            handles PR creation only after independent verification. Summarize the diagnosis,
+            exact files changed, and commands/results.
+          claude_args: '--allowedTools Bash,Read,Edit'
+
+      - name: Verify changes independently
+        if: steps.baseline.outputs.exit_code != '0'
+        id: verify
+        shell: bash
+        run: |
+          set +e
+          if git diff --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo 'No proposed changes.'
+            echo 'passed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          npx playwright test --retries=0 --reporter=line 2>&1 | tee /tmp/playwright-after-heal.log
+          result=${PIPESTATUS[0]}
+          if [ "$result" -eq 0 ]; then
+            echo 'passed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'passed=false' >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+
+      - name: Create repair PR only for verified passing tests
+        if: steps.verify.outputs.passed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_BRANCH: ${{ github.ref_name }}
+          RUN_ID: ${{ github.run_id }}
+          SOURCE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Never include new/untracked files or workflow/secret/config changes automatically.
+          changed="$(git diff --name-only)"
+          if [ -z "$changed" ]; then
+            echo 'No tracked changes to propose.'
+            exit 0
+          fi
+          if printf '%s\n' "$changed" | grep -Ev '^(tests/|test/|pages/|page-objects/|src/pages/|src/page-objects/)' ; then
+            echo 'Changes outside allowlisted automation directories; refusing automatic PR.'
+            exit 1
+          fi
+          if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            echo 'Untracked files present; refusing automatic PR to avoid accidental disclosure.'
+            exit 1
+          fi
+          branch="ai/heal-${RUN_ID}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          mapfile -t files <<< "$changed"
+          git add -- "${files[@]}"
+          git diff --cached --check
+          git commit -m "fix(tests): repair verified Playwright automation failures"
+          git -c http.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin "HEAD:refs/heads/$branch"
+          # --repo: without it, gh in a fork can target the parent repository.
+          gh pr create             --repo "$GITHUB_REPOSITORY"             --base "$BASE_BRANCH"             --head "$branch"             --title "fix(tests): verified Playwright repair"             --body "Automated repair proposal from workflow run ${RUN_ID}. Source SHA: ${SOURCE_SHA}. Verification: the Playwright suite passed with retries disabled. Review all changes before merging."
+
+      - name: Report outcome
+        if: always()
+        env:
+          BASELINE: ${{ steps.baseline.outputs.exit_code }}
+          VERIFIED: ${{ steps.verify.outputs.passed }}
+        run: |
+          echo "Baseline Playwright exit code: ${BASELINE:-not-run}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Independent post-repair verification passed: ${VERIFIED:-not-run}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'A green healing workflow is NOT evidence that the baseline tests passed.' >> "$GITHUB_STEP_SUMMARY"
