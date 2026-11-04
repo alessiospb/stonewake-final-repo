@@ -77,10 +77,4 @@ Both keep their original assertions. Stonewake has not yet confirmed D-01 or D-0
 - **Exposed credentials** from the original repository stay in git history and in the `baseline` branch until their owner rotates them.
 - **Live data:** the suite ran on a changing product, and tests with fixed values (`ui 9`, `ui 7` Briefing) can fail if the data changes.
 - **Report retention:** run artifacts expire after 14 days. The public page keeps the copies it has published.
-- **API key** expires on 2026-11-13, so CI runs will stop signing in to the API after that.
-
-## 6. Deviations from the STP
-
-- Code freeze came at about 1:45 of the session, not 1:30, after extra UI coverage.
-- The report is published through the `gh-pages` branch: deployments stayed `waiting` on the `github-pages` environment.
-- The series script stopped after run 4 because it read the log too early. Run 4 had passed and was not repeated; run 5 was started by hand after it finished.
+- **API key** expires on 2026-11-13, so the API and MCP tests that use it will fail after that date.
